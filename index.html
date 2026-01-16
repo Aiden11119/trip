@@ -39,6 +39,7 @@
       </thead>
       <tbody id="summaryTable"></tbody>
       <tfoot>
+    
         <tr class="table-secondary">
           <th>总结</th>
           <th class="text-end" id="grandTotal">0</th>
@@ -161,7 +162,7 @@ function renderDetail() {
 
 
 function addRow() {
-  data[currentCategory].push({ desc: "", price: 0 });
+  data[currentCategory].push({ desc: "", price:""});
   save();
   renderDetail();
 }
