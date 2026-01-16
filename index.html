@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>旅行花费</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+</head>
+
+<body class="bg-light">
+
+<div class="container my-4">
+
+  <!-- 标题 -->
+  <div class="position-relative mb-4">
+    <!-- 标题居中 -->
+    <h1 id="tripTitle" class="text-center">旅行之旅</h1>
+  
+    <!-- 按钮靠右 -->
+    <button 
+      class="btn btn-danger position-absolute top-0 end-0" 
+      style="transform: translateY(0.25rem);" 
+      onclick="if(confirm('确定要删除所有资料吗？')) { localStorage.clear(); location.reload(); }">
+      删除所有资料
+    </button>
+  </div>
+  
+  <!-- 主列表 -->
+  <div id="mainPage">
+    <table class="table table-bordered bg-white">
+      <thead class="table-light">
+        <tr>
+          <th>项目</th>
+          <th class="text-end">花费 (人民币)</th>
+        </tr>
+      </thead>
+      <tbody id="summaryTable"></tbody>
+      <tfoot>
+        <tr class="table-secondary">
+          <th>总结</th>
+          <th class="text-end" id="grandTotal">0</th>
+        </tr>
+      </tfoot>
+    </table>
+    <p>(***点击对应项目查看详情)</p>
+  </div>
+
+  <!-- 详情页面 -->
+  <div id="detailPage" class="d-none">
+    <h3 id="detailTitle"></h3>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>描述</th>
+          <th>总结 (人民币)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="detailTable"></tbody>
+      <tfoot>
+        <tr>
+          <th>总结</th>
+          <th id="detailTotal">0</th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+
+    <button class="btn btn-primary" onclick="addRow()">新增</button>
+    <button class="btn btn-secondary ms-2" onclick="back()">返回</button>
+  </div>
+
+</div>
+
+
+<script>
+/* ---------- 初始化 ---------- */
+const categories = ["住宿", "交通", "饮食", "门票", "其他"];
+let currentCategory = "";
+
+let data = JSON.parse(localStorage.getItem("tripData")) || {};
+categories.forEach(c => {
+  if (!data[c]) {
+    data[c] = [];
+  }
+});
+
+
+/* ---------- 标题 ---------- */
+let tripName = localStorage.getItem("tripName");
+if (!tripName) {
+  tripName = prompt("请输入旅行名称");
+  localStorage.setItem("tripName", tripName);
+}
+document.getElementById("tripTitle").innerText =`${tripName} 之旅`;
+
+/* ---------- 主页面 ---------- */
+function renderMain() {
+  const tbody = document.getElementById("summaryTable");
+  tbody.innerHTML = "";
+
+  let grand = 0;
+
+  categories.forEach(cat => {
+    const total = data[cat].reduce((s, i) => s + Number(i.price || 0), 0);
+    grand += total;
+
+    tbody.innerHTML += `
+      <tr onclick="openDetail('${cat}')" style="cursor:pointer">
+        <td>${cat}</td>
+        <td class="text-end">${total}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("grandTotal").innerText = grand;
+}
+
+renderMain();
+
+/* ---------- 详情页 ---------- */
+function openDetail(cat) {
+  currentCategory = cat;
+  document.getElementById("detailTitle").innerText = cat;
+  document.getElementById("mainPage").classList.add("d-none");
+  document.getElementById("detailPage").classList.remove("d-none");
+  renderDetail();
+}
+
+function renderDetail() {
+  const tbody = document.getElementById("detailTable");
+  tbody.innerHTML = "";
+  let total = 0;
+
+  data[currentCategory].forEach((item, i) => {
+    total += Number(item.price || 0);
+    tbody.innerHTML += `
+      <tr>
+        <td>
+          <input class="form-control" value="${item.desc}"
+            onchange="update(${i}, 'desc', this.value)">
+        </td>
+        <td>
+          <input type="number" class="form-control" value="${item.price}"
+            onchange="update(${i}, 'price', this.value)">
+        </td>
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="removeRow(${i})">X</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("detailTotal").innerText = total;
+}
+
+
+function addRow() {
+  data[currentCategory].push({ desc: "", price: 0 });
+  save();
+  renderDetail();
+}
+
+function update(i, field, value) {
+  data[currentCategory][i][field] = value;
+  save();
+  renderDetail();
+}
+
+function removeRow(i) {
+  data[currentCategory].splice(i, 1);
+  save();
+  renderDetail();
+}
+
+/* ---------- 返回 ---------- */
+function back() {
+  document.getElementById("detailPage").classList.add("d-none");
+  document.getElementById("mainPage").classList.remove("d-none");
+  renderMain();
+}
+
+/* ---------- 存储 ---------- */
+function save() {
+  localStorage.setItem("tripData", JSON.stringify(data));
+}
+</script>
+
+</body>
+</html>
