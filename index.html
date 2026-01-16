@@ -20,13 +20,14 @@
   
     <!-- 按钮靠右 -->
     <button 
+      id="delete"
       class="btn btn-danger position-absolute top-0 end-0" 
       style="transform: translateY(0.25rem);" 
       onclick="if(confirm('确定要删除所有资料吗？')) { localStorage.clear(); location.reload(); }">
       删除所有资料
     </button>
   </div>
-  
+
   <!-- 主列表 -->
   <div id="mainPage">
     <table class="table table-bordered bg-white">
@@ -126,6 +127,7 @@ function openDetail(cat) {
   currentCategory = cat;
   document.getElementById("detailTitle").innerText = cat;
   document.getElementById("mainPage").classList.add("d-none");
+  document.getElementById("delete").classList.add("d-none");
   document.getElementById("detailPage").classList.remove("d-none");
   renderDetail();
 }
@@ -180,6 +182,7 @@ function removeRow(i) {
 function back() {
   document.getElementById("detailPage").classList.add("d-none");
   document.getElementById("mainPage").classList.remove("d-none");
+  document.getElementById("delete").classList.remove("d-none");
   renderMain();
 }
 
